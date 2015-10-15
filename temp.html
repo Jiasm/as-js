@@ -1,0 +1,80 @@
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+  <head> 
+    <title></title> 
+    <meta name="google" value="notranslate" /> 
+    <meta http-equiv="X-UA-Compatible" content="IE=8;IE=9;IE=10;IE=11;IE=EDGE" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> 
+    <style type="text/css">
+      * {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script type="text/javascript">
+      //flash初始化完毕后调用该方法，方法名固定
+      function sendMessage () {
+          //参数1为视频路径，可相对，可绝对；
+          //参数2为回调方法名
+          getSWF("hello").newMessage("test_clip.flv","callback");
+      }
+      //视频加载完毕后as调用
+      function callback () {
+          if (confirm("是否播放"))
+              getSWF("hello").play("complete"); //调用as播放方法
+          
+      }
+      //视频播放完毕，as调用
+      function complete () {
+          //alert("播放完毕");
+          pushBackground();
+      }
+      //按钮点击，as调用，并传入一个key值
+      function btnClick (key) {
+        alert(key);
+      }
+      //构建链接集合对象信息
+      function pushBackground () {
+        var background = "demo.jpg";
+          var buttons = [
+            {
+              id : 'test1',
+              width : '200',
+              height : '200',
+              top : '200',
+              left : '200',
+              source : 'bc_btn1.png'
+            },
+            {
+              id : 'test2',
+              width : '200',
+              height : '200',
+              top : '400',
+              left : '400',
+              source : 'bc_btn1.png'
+            }
+          ]
+          getSWF("hello").loadMap(background,buttons);  //调用as方法，生成背景以及按钮
+      }
+      //简单的封装获取swf对象
+      function getSWF(movieName){
+          if (navigator.appName.indexOf("Microsoft") != -1){
+              return window[movieName];
+          }
+          else {
+              return document[movieName];
+          }
+      }
+    </script> 
+</head> 
+ <body> 
+  <object type="application/x-shockwave-flash" id="hello" name="hello" align="middle" data="hello.swf" width="100%" height="100%" style="position:absolute;width:100%;height:100%;">
+    <param name="quality" value="high"></param>
+    <param name="bgcolor" value="#ffffff"></param>
+    <param name="allowscriptaccess" value="sameDomain"></param>
+    <param name="allowfullscreen" value="true"></param>
+    <!--[if IE]>-->
+    <param name="movie" value="hello.swf"/>
+     <!--[endif]-->
+  </object>  
+ </body>
+</html>

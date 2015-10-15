@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				backgroundColor="white" creationComplete="initApp();" layout="absolute">
+	<mx:Script>
+		<![CDATA[
+			import mx.containers.Canvas;
+			import mx.controls.Image;
+			import mx.controls.VideoDisplay;
+			import mx.core.Application;
+			import mx.events.VideoEvent;
+			
+			import spark.components.BorderContainer;
+			//导入一些包，java风
+			[Bindable]
+			public var video:VideoDisplay = new VideoDisplay();	//创建一个播放器对象，用来播放视频
+			public var backContainer:BorderContainer = new BorderContainer();	//创建一个容器对象
+			public var canvas:Canvas = new Canvas(); 	//一个背景
+			public var image:Image = new Image(); 	//图片
+			public var completCall:String;	//视频播放完成后调用js方法的名称
+			
+			//初始化的方法
+			public function initApp():void {	
+				//注册方法以供js调用，不注册的话，js无法获取到
+				ExternalInterface.addCallback("newMessage",newMessage);
+				ExternalInterface.addCallback("play",play);
+				ExternalInterface.addCallback("loadMap",loadMap);
+				//初始化完成，调用js方法，这个是唯一一个写死的名字
+				ExternalInterface.call("sendMessage");
+			}
+			
+			//播放视频
+			public function play(callback:String):void {
+				this['video'].play();	//播放器控件，播放方法
+				completCall = callback;	//传入的一个回调的方法名，存入变量
+				this['video'].addEventListener("complete",over);	//添加播放完毕事件
+			}
+			
+			//视频播放完毕
+			public function over(evt:mx.events.VideoEvent):void {
+				ExternalInterface.call(completCall);	//调用js方法
+			}
+			
+			//按钮点击事件
+			public function btnClick(e:MouseEvent):void {
+				//e.target为触发的标签对象，但无法直接获取id，但是该对象toString格式为 swf文件名.控件id号.FlexLoder11
+				var temp:String = e.target.toString();
+				temp = temp.substring(temp.indexOf(".")).substring(1,temp.indexOf(".")+1);
+				
+				ExternalInterface.call("btnClick",temp);	//然后调用js方法，传入key
+			}
+			
+			//无视这个方法名，懒得改，这个是js调用传入的视频路径，以及回调名称
+			public function newMessage(s:String,callback:String):void {
+				video.id="videoDisplay";
+				video.autoPlay=false;
+				video.autoRewind=false;
+				video.source = s;
+				video.width = this.width;
+				video.height = this.height;
+				this.addChild(video);
+				ExternalInterface.call(callback);	//视频加载完成，调用js方法，避免视频没有加载完成就开始播放
+			}
+			//播放完毕后js调用，创建背景图，以及连接
+			public function loadMap(background:String,buttons:Array):void {
+				//创建的背景图
+				canvas.width = this.width;
+				canvas.height = this.height;
+				image.width = this.width;
+				image.height = this.height;
+				image.source = background;
+				image.autoLoad = true;
+				image.maintainAspectRatio = false;
+				canvas.addChild(image);
+				this.removeAllChildren();
+				this.addChild(canvas);
+				canvas.depth = 1;	//depth相当于z-index
+				
+				//然后遍历循环传入的链接对象集合，动态创建button在背景图上
+				for (var index:Number = 0; index < buttons.length; index++) {
+					var button:Object = buttons[index];
+					var btn:Image = new Image();
+					btn.id = button.id;
+					btn.width = button.width;
+					btn.height = button.height;
+					btn.top = button.top;
+					btn.left = button.left;
+					btn.source = button.source;
+					btn.autoLoad = true;
+					btn.maintainAspectRatio = false;
+					btn.depth = 2;
+					btn.addEventListener("click",btnClick);	//给按钮绑定点击事件
+					this.addChild(btn);
+				}
+			}
+		]]>
+	</mx:Script>
+	
+</mx:Application>
